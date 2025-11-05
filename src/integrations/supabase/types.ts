@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      criminals: {
+        Row: {
+          created_at: string
+          criminal_id: string | null
+          description: string | null
+          id: string
+          name: string
+          photo_url: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          criminal_id?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          photo_url: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          criminal_id?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          photo_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      matched_criminals: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          criminal_id: string
+          detection_id: string
+          id: string
+          timestamp: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          criminal_id: string
+          detection_id: string
+          id?: string
+          timestamp?: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          criminal_id?: string
+          detection_id?: string
+          id?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matched_criminals_criminal_id_fkey"
+            columns: ["criminal_id"]
+            isOneToOne: false
+            referencedRelation: "criminals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matched_criminals_detection_id_fkey"
+            columns: ["detection_id"]
+            isOneToOne: false
+            referencedRelation: "theft_detections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       theft_detections: {
         Row: {
           confidence_score: number | null
