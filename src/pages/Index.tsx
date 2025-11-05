@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Shield } from "lucide-react";
 import { VideoUpload } from "@/components/VideoUpload";
 import { TheftList } from "@/components/TheftList";
 import { DetectionDetails } from "@/components/DetectionDetails";
@@ -12,14 +11,9 @@ const Index = () => {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Shield className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">Theft Detection System</h1>
-              <p className="text-sm text-muted-foreground">AI-Powered Video Analysis</p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold">GodsEye</h1>
+            <p className="text-sm text-muted-foreground">AI-Powered Video Analysis</p>
           </div>
         </div>
       </header>
@@ -54,7 +48,7 @@ const Index = () => {
               <div className="h-full flex items-center justify-center">
                 <div className="text-center space-y-3">
                   <div className="w-16 h-16 mx-auto rounded-full bg-secondary flex items-center justify-center">
-                    <Shield className="h-8 w-8 text-muted-foreground" />
+                    <div className="h-8 w-8 text-muted-foreground">👁️</div>
                   </div>
                   <h3 className="text-xl font-semibold">No Detection Selected</h3>
                   <p className="text-muted-foreground max-w-md">
