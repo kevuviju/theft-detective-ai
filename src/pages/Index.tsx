@@ -1,12 +1,71 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { Shield } from "lucide-react";
+import { VideoUpload } from "@/components/VideoUpload";
+import { TheftList } from "@/components/TheftList";
+import { DetectionDetails } from "@/components/DetectionDetails";
 
 const Index = () => {
+  const [selectedDetection, setSelectedDetection] = useState<any>(null);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Shield className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Theft Detection System</h1>
+              <p className="text-sm text-muted-foreground">AI-Powered Video Analysis</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Upload & List */}
+          <div className="lg:col-span-1 space-y-6">
+            <section>
+              <h2 className="text-lg font-semibold mb-4">Upload Video</h2>
+              <VideoUpload onUploadComplete={(id) => console.log('Uploaded:', id)} />
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold mb-4">Detection History</h2>
+              <TheftList 
+                onSelectDetection={setSelectedDetection}
+                selectedId={selectedDetection?.id || null}
+              />
+            </section>
+          </div>
+
+          {/* Right Column - Details */}
+          <div className="lg:col-span-2">
+            {selectedDetection ? (
+              <>
+                <h2 className="text-lg font-semibold mb-4">Detection Details</h2>
+                <DetectionDetails detection={selectedDetection} />
+              </>
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center space-y-3">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-secondary flex items-center justify-center">
+                    <Shield className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xl font-semibold">No Detection Selected</h3>
+                  <p className="text-muted-foreground max-w-md">
+                    Upload a video or select a detection from the history to view detailed analysis
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
