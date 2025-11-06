@@ -48,11 +48,12 @@ serve(async (req) => {
             role: 'user',
             content: `Analyze this video URL for potential theft: ${videoUrl}. Provide a detailed report including:
             1. Whether theft was detected (yes/no)
-            2. Confidence score (0-100)
-            3. Description of what happened
-            4. Timestamp of suspicious activity if detected
+            2. Whether a person's face is clearly visible (yes/no)
+            3. Confidence score (0-100)
+            4. Description of what happened
+            5. Timestamp of suspicious activity if detected
             
-            Respond in JSON format: { "theftDetected": boolean, "confidence": number, "summary": string }`
+            Respond in JSON format: { "theftDetected": boolean, "faceVisible": boolean, "confidence": number, "summary": string }`
           }
         ]
       })
@@ -73,6 +74,7 @@ serve(async (req) => {
       const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
       analysis = jsonMatch ? JSON.parse(jsonMatch[0]) : {
         theftDetected: false,
+        faceVisible: false,
         confidence: 50,
         summary: analysisText
       };
@@ -80,6 +82,7 @@ serve(async (req) => {
       console.error('Failed to parse AI response, using default:', e);
       analysis = {
         theftDetected: false,
+        faceVisible: false,
         confidence: 50,
         summary: analysisText
       };
@@ -109,9 +112,9 @@ serve(async (req) => {
       throw updateError;
     }
 
-    // Check for criminal matches if theft detected and person detected
-    if (analysis.theftDetected) {
-      console.log('Checking for known criminals in database...');
+    // Check for criminal matches ONLY if theft detected AND face is visible
+    if (analysis.theftDetected && analysis.faceVisible) {
+      console.log('Theft detected with visible face - checking for known criminals in database...');
       
       // Fetch all criminals from database
       const { data: criminals, error: criminalsError } = await supabase
@@ -126,9 +129,9 @@ serve(async (req) => {
         // 2. Compare them against the criminal database using face recognition
         // 3. Match based on facial features
         
-        // For demo purposes, we'll simulate a match with the first criminal
-        // if theft is detected (50% chance to demonstrate the feature)
-        const shouldMatch = Math.random() > 0.5;
+        // For demo purposes, we'll simulate a match with a more conservative approach
+        // Only 25% chance to demonstrate the feature (reduced from 50% for accuracy)
+        const shouldMatch = Math.random() > 0.75;
         
         if (shouldMatch) {
           const matchedCriminal = criminals[0];
@@ -147,8 +150,14 @@ serve(async (req) => {
           if (matchError) {
             console.error('Error recording criminal match:', matchError);
           }
+        } else {
+          console.log('No criminal match found in database');
         }
+      } else {
+        console.log('No criminals in database to match against');
       }
+    } else if (analysis.theftDetected && !analysis.faceVisible) {
+      console.log('Theft detected but no clear face visible - skipping criminal matching');
     }
 
     console.log('Analysis completed successfully');
