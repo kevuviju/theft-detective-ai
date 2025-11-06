@@ -70,6 +70,41 @@ export const VideoUpload = ({ onUploadComplete }: VideoUploadProps) => {
       });
 
       onUploadComplete(detection.id);
+
+      // Set up real-time subscription for criminal matches
+      const channel = supabase
+        .channel(`detection-${detection.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'matched_criminals',
+            filter: `detection_id=eq.${detection.id}`
+          },
+          async (payload) => {
+            // Fetch criminal details
+            const { data: criminal } = await supabase
+              .from('criminals')
+              .select('*')
+              .eq('id', payload.new.criminal_id)
+              .single();
+
+            if (criminal) {
+              toast({
+                title: "⚠️ Known Criminal Detected!",
+                description: `${criminal.name} has been identified in the video`,
+                variant: "destructive",
+              });
+            }
+          }
+        )
+        .subscribe();
+
+      // Clean up subscription after 2 minutes
+      setTimeout(() => {
+        channel.unsubscribe();
+      }, 120000);
     } catch (error) {
       console.error('Upload error:', error);
       toast({

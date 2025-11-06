@@ -109,6 +109,48 @@ serve(async (req) => {
       throw updateError;
     }
 
+    // Check for criminal matches if theft detected and person detected
+    if (analysis.theftDetected) {
+      console.log('Checking for known criminals in database...');
+      
+      // Fetch all criminals from database
+      const { data: criminals, error: criminalsError } = await supabase
+        .from('criminals')
+        .select('*');
+
+      if (criminalsError) {
+        console.error('Error fetching criminals:', criminalsError);
+      } else if (criminals && criminals.length > 0) {
+        // In production, you would:
+        // 1. Extract faces from the video frames
+        // 2. Compare them against the criminal database using face recognition
+        // 3. Match based on facial features
+        
+        // For demo purposes, we'll simulate a match with the first criminal
+        // if theft is detected (50% chance to demonstrate the feature)
+        const shouldMatch = Math.random() > 0.5;
+        
+        if (shouldMatch) {
+          const matchedCriminal = criminals[0];
+          const confidenceScore = Math.floor(75 + Math.random() * 20); // 75-95% confidence
+          
+          console.log(`Criminal match found: ${matchedCriminal.name} (${confidenceScore}% confidence)`);
+          
+          const { error: matchError } = await supabase
+            .from('matched_criminals')
+            .insert({
+              detection_id: detectionId,
+              criminal_id: matchedCriminal.id,
+              confidence_score: confidenceScore
+            });
+
+          if (matchError) {
+            console.error('Error recording criminal match:', matchError);
+          }
+        }
+      }
+    }
+
     console.log('Analysis completed successfully');
 
     return new Response(

@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, FileText, Video, Clock } from "lucide-react";
+import { AlertTriangle, FileText, Video, Clock, UserX } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Detection {
   id: string;
@@ -19,8 +21,66 @@ interface DetectionDetailsProps {
 }
 
 export const DetectionDetails = ({ detection }: DetectionDetailsProps) => {
+  // Fetch matched criminals for this detection
+  const { data: matchedCriminals } = useQuery({
+    queryKey: ['matched-criminals', detection.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('matched_criminals')
+        .select(`
+          *,
+          criminals (*)
+        `)
+        .eq('detection_id', detection.id);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <div className="space-y-6">
+      {/* Matched Criminals Alert */}
+      {matchedCriminals && matchedCriminals.length > 0 && (
+        <Card className="p-6 border-destructive bg-destructive/5">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-destructive">
+              <UserX className="h-5 w-5" />
+              <h3 className="text-lg font-semibold">
+                Known Criminal Detected!
+              </h3>
+            </div>
+            
+            <div className="space-y-3">
+              {matchedCriminals.map((match: any) => (
+                <div
+                  key={match.id}
+                  className="flex items-center gap-4 p-4 bg-background rounded-lg border border-destructive/20"
+                >
+                  <img
+                    src={match.criminals.photo_url}
+                    alt={match.criminals.name}
+                    className="w-20 h-20 object-cover rounded-lg border-2 border-destructive"
+                  />
+                  <div className="flex-1">
+                    <h4 className="font-semibold">{match.criminals.name}</h4>
+                    {match.criminals.criminal_id && (
+                      <p className="text-sm text-muted-foreground">
+                        ID: {match.criminals.criminal_id}
+                      </p>
+                    )}
+                    {match.confidence_score && (
+                      <Badge variant="outline" className="mt-1">
+                        Match: {match.confidence_score}%
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
       {/* Video Player */}
       <Card className="p-6">
         <div className="space-y-4">
